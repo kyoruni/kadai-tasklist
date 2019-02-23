@@ -28,6 +28,9 @@ class TasksController extends Controller
     // 新規作成処理
     public function store(Request $request)
     {
+        // タスクが入力されていて、191文字以上でない場合のみOK
+        $this->validate($request, ['content' => 'required|max:191',]);
+
         // フォームから送られてきたcontentはrequestに入っているので、requestから取り出して登録
         $task = new Task;
         $task->content = $request->content;
@@ -55,6 +58,9 @@ class TasksController extends Controller
     // 編集処理
     public function update(Request $request, $id)
     {
+        // タスクが入力されていて、191文字以上でない場合のみOK
+        $this->validate($request, ['content' => 'required|max:191',]);
+
         // フォームから送られてきたcontentはrequestに入っているので、requestから取り出して登録
         $task = Task::find($id);
         $task->content = $request->content;
