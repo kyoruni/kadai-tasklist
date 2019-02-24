@@ -35,7 +35,7 @@ class TasksController extends Controller
 
         // フォームから送られてきたcontentはrequestに入っているので、requestから取り出して登録
         $task = new Task;
-        $task->task    = $request->task;
+        $task->status  = $request->status;
         $task->content = $request->content;
         $task->save();
 
