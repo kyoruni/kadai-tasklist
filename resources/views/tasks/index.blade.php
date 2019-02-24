@@ -28,6 +28,9 @@
         </table>
     @endif
 
+    <!-- ページネーション用リンク -->
+    {{ $tasks->render('pagination::bootstrap-4') }}
+
     <!-- 新規作成ボタン -->
-    {!! link_to_route('tasks.create', '新規タスクの作成', null, ['class' => 'btn btn-primary']) !!}
+    {!! link_to_route('tasks.create', '新規タスクの作成', null, ['class' => 'btn btn-primary mb-4']) !!}
 @endsection
