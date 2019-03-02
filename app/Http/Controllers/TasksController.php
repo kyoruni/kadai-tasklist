@@ -11,10 +11,15 @@ class TasksController extends Controller
     // 一覧表示
     public function index()
     {
-        $tasks = Task::orderBy('id', 'desc')->paginate(25);
+        if (\Auth::check()) {
+            $user  = \Auth::user();
+            $tasks = $user->tasks()->orderBy('id', 'desc')->paginate(25);
 
-        // View側で呼び出すtasksに、$tasksを渡しておく
-        return view('tasks.index', ['tasks' => $tasks,]);
+            // View側で呼び出すtasksに、$tasksを渡しておく
+            return view('tasks.index', ['tasks' => $tasks,]);
+        }
+        // ログインしていなかったら、task取得しないでindexへ
+        return view('tasks.index');
     }
 
     // 新規作成ページ
@@ -36,9 +41,11 @@ class TasksController extends Controller
 
         // フォームから送られてきたcontentはrequestに入っているので、requestから取り出して登録
         $task = new Task;
-        $task->status  = $request->status;
-        $task->content = $request->content;
-        $task->save();
+
+        $request->user()->tasks()->create([
+            'status'  => $request->status,
+            'content' => $request->content,
+        ]);
 
         return redirect('/');
     }
@@ -46,9 +53,14 @@ class TasksController extends Controller
     // 個別表示ページ
     public function show($id)
     {
-        $task = Task::find($id);
+        $task = \App\Task::find($id);
 
-        return view('tasks.show', ['task' => $task,]);
+        // ログインユーザー = タスク作成者なら表示画面へ
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.show', ['task' => $task,]);
+        }
+        // 編集画面へ入れなかった場合はトップページへ
+        return redirect('/');
     }
 
     // 編集ページ
@@ -56,7 +68,12 @@ class TasksController extends Controller
     {
         $task = Task::find($id);
 
-        return view('tasks.edit', ['task' => $task,]);
+        // ログインユーザー = タスク作成者なら編集画面へ
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.edit', ['task' => $task,]);
+        }
+        // 編集画面へ入れなかった場合はトップページへ
+        return redirect('/');
     }
 
     // 編集処理
@@ -68,20 +85,24 @@ class TasksController extends Controller
                                    'content' => 'required|max:191',]);
 
         // フォームから送られてきたcontentはrequestに入っているので、requestから取り出して登録
-        $task = Task::find($id);
-        $task->status  = $request->status;
-        $task->content = $request->content;
-        $task->save();
+        $task = \App\Task::find($id);
 
+        // ログインユーザー = タスク作成者なら編集処理へ
+        if (\Auth::id() === $task->user_id) {
+            $task->status  = $request->status;
+            $task->content = $request->content;
+            $task->save();
+        }
         return redirect('/');
     }
 
     // 削除処理
     public function destroy($id)
     {
-        $task = Task::find($id);
-        $task->delete();
-
+        $task = \App\Task::find($id);
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+        }
         return redirect('/');
     }
 }
