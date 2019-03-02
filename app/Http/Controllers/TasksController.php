@@ -72,7 +72,7 @@ class TasksController extends Controller
         if (\Auth::id() === $task->user_id) {
             return view('tasks.edit', ['task' => $task,]);
         }
-        // 編集画面へ入れなかった場合はトップページへ
+        // 編集画面に入れなかった場合はトップページへ
         return redirect('/');
     }
 
